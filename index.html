@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  overflow: hidden;
+}
+
+/* кнопка */
+#startBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  background: red;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+/* фото */
+#creepy {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+/* глитч */
+.glitch {
+  animation: glitch 0.15s infinite;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  25% { transform: translate(-10px, 5px); }
+  50% { transform: translate(10px, -5px); }
+  75% { transform: translate(-5px, 3px); }
+  100% { transform: translate(0); }
+}
+
+/* кровь сверху */
+#bloodTop {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(to bottom, darkred, transparent);
+  display: none;
+}
+
+/* потёки */
+.drip {
+  position: absolute;
+  top: 0;
+  width: 6px;
+  height: 0;
+  background: red;
+  animation: drip 4s forwards;
+}
+
+@keyframes drip {
+  to { height: 100vh; }
+}
+
+/* финальная кровь */
+#bloodFill {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0;
+  background: darkred;
+  z-index: 9999;
+}
+
+/* вспышка */
+.flash {
+  background: white !important;
+}
+</style>
+</head>
+
+<body>
+
+<div id="startBtn"></div>
+
+<img id="creepy" src="images/photo1.png">
+
+<div id="bloodTop"></div>
+<div id="bloodFill"></div>
+
+<audio id="bgMusic">
+  <source src="sounds/music.mp3">
+</audio>
+
+<script>
+
+let started = false;
+
+document.getElementById("startBtn").onclick = () => {
+  if (started) return;
+  started = true;
+
+  document.getElementById("startBtn").style.display = "none";
+  document.getElementById("creepy").style.display = "block";
+  document.getElementById("bloodTop").style.display = "block";
+
+  startTest();
+};
+
+// кровь сверху (реальные потёки)
+function startBlood() {
+  const container = document.getElementById("bloodTop");
+
+  setInterval(() => {
+    let drip = document.createElement("div");
+    drip.className = "drip";
+    drip.style.left = Math.random() * window.innerWidth + "px";
+    container.appendChild(drip);
+
+    setTimeout(() => drip.remove(), 4000);
+  }, 200);
+}
+
+// вспышка
+function flash() {
+  document.body.classList.add("flash");
+  setTimeout(() => document.body.classList.remove("flash"), 60);
+}
+
+// звук
+function playSound(src, volume=1) {
+  let audio = new Audio(src);
+  audio.volume = volume;
+  audio.playbackRate = 0.8 + Math.random()*0.6;
+  audio.play();
+}
+
+// основной запуск
+function startTest() {
+
+  let music = document.getElementById("bgMusic");
+  music.volume = 0;
+  music.play();
+
+  // плавное усиление музыки
+  let vol = 0;
+  let fade = setInterval(() => {
+    vol += 0.05;
+    music.volume = vol;
+    if (vol >= 0.5) clearInterval(fade);
+  }, 200);
+
+  startBlood();
+
+  let sounds = [
+    "sounds/sound1.mp3",
+    "sounds/sound2.mp3"
+  ];
+
+  let img = document.getElementById("creepy");
+  let images = [
+    "images/photo1.png",
+    "images/photo2.png"
+  ];
+
+  // глитч фото
+  let glitchInterval = setInterval(() => {
+    img.src = images[Math.floor(Math.random()*images.length)];
+    img.classList.add("glitch");
+    setTimeout(() => img.classList.remove("glitch"), 100);
+  }, 150);
+
+  // звуки + вспышки
+  let soundInterval = setInterval(() => {
+    flash();
+    let s = sounds[Math.floor(Math.random()*sounds.length)];
+    playSound(s, 1);
+  }, 300);
+
+  // ФИНАЛ
+  music.onended = () => {
+
+    // остановка всего
+    clearInterval(glitchInterval);
+    clearInterval(soundInterval);
+
+    let img = document.getElementById("creepy");
+    let fill = document.getElementById("bloodFill");
+
+    // убрать глитч
+    img.classList.remove("glitch");
+
+    // зафиксировать photo2
+    img.src = "images/photo2.png";
+
+    // остановить звуки
+    let audios = document.querySelectorAll("audio");
+    audios.forEach(a => a.pause());
+
+    // кровь поднимается
+    let h = 0;
+    let interval = setInterval(() => {
+      h += 2;
+      fill.style.height = h + "%";
+
+      if (h >= 100) {
+        clearInterval(interval);
+
+        // вспышка
+        document.body.style.background = "white";
+        setTimeout(() => {
+          document.body.style.background = "black";
+        }, 120);
+
+        // финальное фото
+        setTimeout(() => {
+          img.src = "images/photo3.png";
+          img.style.filter = "brightness(0.5) contrast(1.7)";
+        }, 200);
+      }
+
+    }, 50);
+  };
+}
+
+</script>
+
+</body>
+</html>
