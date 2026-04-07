@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>?</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  color: white;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+/* мерцание */
+@keyframes flicker {
+  0% {opacity: 1;}
+  50% {opacity: 0.3;}
+  100% {opacity: 1;}
+}
+
+/* глитч текст */
+.glitch {
+  position: absolute;
+  font-size: 30px;
+  animation: flicker 0.2s infinite;
+}
+
+/* случайные надписи */
+.word {
+  position: absolute;
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+/* красный экран */
+.flash {
+  background: darkred !important;
+}
+</style>
+</head>
+
+<body>
+
+<div id="main" class="glitch">…</div>
+
+<script>
+
+let words = [
+  "ты это видел?",
+  "не смотри назад",
+  "оно здесь",
+  "почему ты ещё здесь",
+  "ошибка",
+  "я знаю тебя",
+  "..."
+];
+
+// двигающийся текст
+setInterval(() => {
+  let main = document.getElementById("main");
+  main.style.left = Math.random()*90 + "%";
+  main.style.top = Math.random()*90 + "%";
+  main.innerText = words[Math.floor(Math.random()*words.length)];
+}, 300);
+
+// появляющиеся слова
+setInterval(() => {
+  let w = document.createElement("div");
+  w.className = "word";
+  w.innerText = words[Math.floor(Math.random()*words.length)];
+
+  w.style.left = Math.random()*100 + "%";
+  w.style.top = Math.random()*100 + "%";
+
+  document.body.appendChild(w);
+
+  setTimeout(() => w.remove(), 2000);
+}, 200);
+
+// случайные вспышки
+setInterval(() => {
+  document.body.classList.add("flash");
+  setTimeout(() => document.body.classList.remove("flash"), 100);
+}, 1500 + Math.random()*2000);
+
+// странная смена title
+setInterval(() => {
+  document.title = words[Math.floor(Math.random()*words.length)];
+}, 500);
+
+</script>
+
+</body>
+</html>
